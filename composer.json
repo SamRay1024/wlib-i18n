@@ -1,0 +1,23 @@
+{
+    "name": "wlib/i18n",
+    "description": "Brings internationalization tools to your PHP project.",
+    "type": "library",
+    "keywords": ["wlib", "utils", "helpers", "internationalization", "localisation", "i18n", "l10n"],
+    "license": "CECILL-2.1",
+    "authors": [
+        {
+            "name": "Cédric Ducarre",
+            "email": "samray1024@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1.0",
+        "pomo/pomo": "^1.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "wlib\\I18n\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
