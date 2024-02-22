@@ -41,10 +41,33 @@ use POMO\Translations\NOOPTranslations;
 use POMO\Translations\TranslationsInterface;
 use RuntimeException;
 
+/**
+ * Wrapper class over pomo/pomo classes to manage translations in your application.
+ * 
+ * @author Cédric Ducarre
+ */
 class Translator
 {
+	/**
+	 * List of availables translations files.
+	 * @var array
+	 */
 	private array $aTranslations;
-	
+
+	public function __construct()
+	{
+		// This "hacks", used for helpers, can cause problems if the class is
+		// instanciated several times
+		$GLOBALS[self::class] = $this;
+	}
+
+	/**
+	 * Add a translation file (.po).
+	 * 
+	 * @param string $sFilename File path an name of a .po file to load.
+	 * @param mixed $sDomain Translation domain ('default' if unused).
+	 * @return void
+	 */
 	public function addTranslationsFile(string $sFilename, string $sDomain = 'default')
 	{
 		if (!is_file($sFilename) || !is_readable($sFilename))
@@ -52,9 +75,6 @@ class Translator
 				'File "%s" not found or not readable.',
 				$sFilename
 			));
-
-		if (!isset($this->aTranslations[$sDomain]))
-			$this->aTranslations[$sDomain] = [];
 
 		$translations = new MO();
 		$translations->import_from_file($sFilename);
@@ -70,33 +90,52 @@ class Translator
 			$prevTranslation->merge_with($translations);
 		}
 	}
-
+	
+	/**
+	 * Get the translation of the given text.
+	 *
+	 * @param string $sText Text to translate.
+	 * @param string $sDomain Text domain.
+	 * @param string|null $sContext Context information for translators.
+	 * @return string
+	 */
 	public function translate(
-		string $sText,
-		string $sDomain = 'default',
-		?string $sContext = null
+		string $sText, string $sDomain = 'default', ?string $sContext = null
 	): string
 	{
 		$translations = $this->getDomainTranslation($sDomain);
-		
+
 		return $translations->translate($sText, $sContext);
 	}
 
+	/**
+	 * Get the singular or plural form of the given texts based on the supplied count.
+	 *
+	 * @param string $sSingular Singular text form.
+	 * @param string $sPlural Plural text form.
+	 * @param int $iCount Count number for choosing between singular or plural.
+	 * @param string $sDomain Text domain.
+	 * @param string|null $sContext Context information for translators.
+	 * @return string
+	 */
 	public function translatePlural(
-		string $sSingular,
-		string $sPlural,
-		int $iCount,
-		string $sDomain = 'default',
-		?string $sContext = null
+		string $sSingular, string $sPlural, int $iCount,
+		string $sDomain = 'default', ?string $sContext = null
 	): string
 	{
 		$translations = $this->getDomainTranslation($sDomain);
 		return $translations->translate_plural($sSingular, $sPlural, $iCount, $sContext);
 	}
-
-	private function getDomainTranslation($sDomain): TranslationsInterface
+	
+	/**
+	 * Get the translation instance associated to the given domain.
+	 *
+	 * @param string $sDomain Texts domain.
+	 * @return TranslationsInterface
+	 */
+	private function getDomainTranslation(string $sDomain): TranslationsInterface
 	{
-		$sDomain = $sDomain ?: 'default';
+		$sDomain = ($sDomain ?: 'default');
 
 		if (!isset($this->aTranslations[$sDomain]))
 			return new NOOPTranslations();
