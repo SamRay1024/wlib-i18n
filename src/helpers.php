@@ -45,9 +45,9 @@
  * ```
  * 
  * @param string $sText Text to translate.
- * @param string $sDomain Use to get the translated string from the specified domain.
+ * @param string $sDomain Text domain. Default to "default".
  */
-function __(string $sText, string $sDomain = ''): string
+function __(string $sText, string $sDomain = 'default'): string
 {
 	if (!isset($GLOBALS[wlib\I18n\Translator::class]))
 		return $sText;
@@ -63,10 +63,12 @@ function __(string $sText, string $sDomain = ''): string
  * @param string $sSingular Singular text form.
  * @param string $sPlural Plural text form.
  * @param int $iCount Count number for choosing between singular or plural.
- * @param string $sDomain Text domain.
+ * @param string $sDomain Text domain. Default to "default".
  * @return string
  */
-function _n(string $sSingular, string $sPlural, int $iCount, string $sDomain = ''): string
+function _n(
+	string $sSingular, string $sPlural, int $iCount, string $sDomain = 'default'
+): string
 {
 	if (!isset($GLOBALS[wlib\I18n\Translator::class]))
 		return ($iCount > 1 ? $sPlural : $sSingular);
@@ -74,4 +76,85 @@ function _n(string $sSingular, string $sPlural, int $iCount, string $sDomain = '
 	/** @var wlib\I18n\Translator $translator */
 	$translator = $GLOBALS[wlib\I18n\Translator::class];
 	return $translator->translatePlural($sSingular, $sPlural, $iCount, $sDomain);
+}
+
+/**
+ * Same helper as `__()` but whith context.
+ * 
+ * @param string $sText Text to translate.
+ * @param string $sContext Context information for translators.
+ * @param string $sDomain Text domain. Default to "default".
+ * @return string
+ */
+function _x(string $sText, string $sContext, string $sDomain = 'default'): string
+{
+	if (!isset($GLOBALS[wlib\I18n\Translator::class]))
+		return $sText;
+
+	/** @var wlib\I18n\Translator $translator */
+	$translator = $GLOBALS[wlib\I18n\Translator::class];
+	return $translator->translate($sText, $sDomain, $sContext);
+}
+
+/**
+ * Same helper as `_n()` but whith context.
+ * 
+ * @param string $sSingular Singular text form.
+ * @param string $sPlural Plural text form.
+ * @param int $iCount Count number for choosing between singular or plural.
+ * @param string $sContext Context information for translators.
+ * @param string $sDomain Text domain. Default to "default".
+ * @return string
+ */
+function _nx(
+	string $sSingular, string $sPlural, int $iCount,
+	string $sContext, string $sDomain = 'default'
+): string
+{
+	if (!isset($GLOBALS[wlib\I18n\Translator::class]))
+		return ($iCount > 1 ? $sPlural : $sSingular);
+
+	/** @var wlib\I18n\Translator $translator */
+	$translator = $GLOBALS[wlib\I18n\Translator::class];
+	return $translator->translatePlural(
+		$sSingular, $sPlural, $iCount, $sDomain, $sContext
+	);
+}
+
+/**
+ * Same helper as `__()` but with `sprintf()` wrapping.
+ * 
+ * @param string $sText Text to translate.
+ * @param mixed $mValues `sprintf()` values (value or array of values).
+ * @param string $sDomain Text domain. Default to "default".
+ * @return string
+ */
+function _s(string $sText, mixed $mValues, string $sDomain = 'default'): string
+{
+	if (!is_array($mValues))
+	$mValues = [$mValues];
+
+return call_user_func_array('sprintf', array_merge([__($sText, $sDomain)], $mValues));
+}
+
+/**
+ * Same helper as `_n()` but with `sprintf()` wrapping.
+ * 
+ * @param string $sSingular Singular text form.
+ * @param string $sPlural Plural text form.
+ * @param int $iCount Count number for choosing between singular or plural.
+ * @param mixed|array $mValues `sprintf()` values (value or array of values).
+ * @param string $sDomain Text domain. Default to "default".
+ * @return string
+ */
+function _ns(
+	string $sSingular, string $sPlural, int $iCount, mixed $mValues, string $sDomain = 'default'
+): string
+{
+	if (!is_array($mValues))
+		$mValues = [$mValues];
+
+	return call_user_func_array('sprintf', array_merge(
+		[_n($sSingular, $sPlural, $iCount, $sDomain)], $mValues
+	));
 }
